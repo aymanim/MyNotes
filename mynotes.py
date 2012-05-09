@@ -1,6 +1,3 @@
-
-
-
 import os
 import sys
 import datetime
@@ -11,18 +8,18 @@ import parsedatetime.parsedatetime as pdt
 import parsedatetime.parsedatetime_consts as pdc
 
 
-
 def initParser(args):
 
     parser = OptionParser()
-    
 
-    parser.add_option("-d", "--date",
-                  action="store", type="string", dest="date")
-
+    parser.add_option("-d", "--date", action="store", type="string", dest="date")
+    parser.add_option("-e", "--editor", action="store", type="string", dest="editor")
+    parser.add_option("-r", "--root", action="store", type="string", dest="root")
     
     (options, args) = parser.parse_args(args)
+
     return options
+
 
 def parseDate(dateString):
 
@@ -38,12 +35,17 @@ def parseDate(dateString):
 
 def main():
 
-
     options = initParser(sys.argv)
 
-    pathToDataFiles = "/Users/ajsingh/myNotes/"
-    editor = "subl"
-
+    if(options.root):
+        pathToDataFiles = options.root #make sure we have a / in the end
+    else:        
+        pathToDataFiles = "/Users/ajsingh/Dropbox/myNotes/"
+    
+    if(options.editor):
+        editor = options.editor
+    else:
+        editor = "subl"
 
     if(options.date):
         (year, monthDay) = parseDate(options.date)
@@ -55,9 +57,6 @@ def main():
 
     currDir = pathToDataFiles + '%0*d' %(4, year)
     currFile = currDir + "/" + monthDay + ".txt"
-
-    #currDir = pathToDataFiles + '%0*d' %(4, 2011)
-    #currFile = currDir + "/" + '%0*d' %(2, now.month) + '%0*d' %(2, 1) + ".txt"
 
     try:
         os.makedirs(currDir)
