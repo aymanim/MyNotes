@@ -12,6 +12,7 @@ defaultFileExtension = ".txt"
 defaultPathToDataFiles = "/Users/ajsingh/SkyDrive/myNotes/"
 defaultEditor = "subl"
 pathToScript = "/Users/ajsingh/dev/mynotes/"
+defaultPathToView = "/Users/ajsingh/Dropbox/notes_view.html"
 
 
 pathToTemplateEntry = pathToScript + "template_entry.html"
@@ -28,6 +29,9 @@ def initParser(args):
 
     parser.add_option("-e", "--editor", action="store", type="string", 
                         dest="editor", help="Override the editor.")
+    
+    parser.add_option("-o", "--output", action="store", type="string", 
+                        dest="output", help="Output file. Default is "+defaultPathToView)
     
     parser.add_option("-r", "--root", action="store", type="string", 
                         dest="root", help="Change the root location of this\
@@ -53,7 +57,7 @@ def parseDate(dateString):
 
     return (year, monthDay)
 
-def generateView(rootDir):
+def generateView(rootDir, viewFile):
     regExFilename = re.compile('[0-9][0-9][0-9][0-9]\.txt')
     regExDir = re.compile('[0-9][0-9][0-9][0-9]')
 
@@ -97,8 +101,11 @@ def generateView(rootDir):
 
         allData += perYearData
 
+    #print out to view
+    viewFileHandle = open(viewFile, "w")
 
-    print templateBaseData.replace("{{ full_data }}", allData)
+
+    viewFileHandle.write(templateBaseData.replace("{{ full_data }}", allData))
 
 
 def main():
@@ -123,8 +130,13 @@ def main():
         year = now.year
         monthDay = '%0*d' %(2, now.month) + '%0*d' %(2, now.day)
 
+    if(options.output):
+        pathToViewFile = options.output
+    else:
+        pathToViewFile = defaultPathToView
+
     if(options.view):
-        generateView(pathToDataFiles)
+        generateView(pathToDataFiles, pathToViewFile)
         return
 
 
@@ -137,9 +149,12 @@ def main():
         if e.errno != errno.EEXIST:
             raise
 
-    subprocess.call([editor, currFile])
+    if(editor == "subl"):
+        subprocess.call([editor, "-w", currFile])
+    else:
+        subprocess.call([editor, currFile])
 
-    generateView(pathToDataFiles)
+    generateView(pathToDataFiles, pathToViewFile)
 
 
 
